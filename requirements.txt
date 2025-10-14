@@ -1,0 +1,6 @@
+flask
+Beautifulsoup4
+requests
+pandas
+py2neo
+python-Levenshtein
