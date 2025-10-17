@@ -2,5 +2,6 @@ flask
 Beautifulsoup4
 requests
 pandas
-py2neo
-python-Levenshtein
+tqdm
+# py2neo
+# python-Levenshtein
