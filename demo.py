@@ -39,4 +39,4 @@ RETURN SUBSTRING(REDUCE(s = '', x IN COLLECT(rel.name) | s + ' / ' + x), 3) AS R
 '''
 
 result = graph.run(cql).data()
-print(result[0])
+print(result[0]['RES'])
