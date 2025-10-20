@@ -3,5 +3,5 @@ Beautifulsoup4
 requests
 pandas
 tqdm
-# py2neo
+py2neo
 # python-Levenshtein
