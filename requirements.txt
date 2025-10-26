@@ -4,4 +4,4 @@ requests
 pandas
 tqdm
 py2neo
-# python-Levenshtein
+python-Levenshtein

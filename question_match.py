@@ -1,5 +1,5 @@
 from config import *
-import re, json, itertools
+import re, json, itertools, Levenshtein
 
 class GraphQA():
     def __init__(self):
@@ -67,21 +67,32 @@ class GraphQA():
             if self.check_slots(cypher_slots, slots):
                 combinations = self.get_slots_combinations(cypher_slots, slots)
                 for combination in combinations:
-                    question = self.replace_token_in_string(template['question'], combination)
+                    question = self.replace_token_in_string(template['question'], combinatio_n)
                     cypher = self.replace_token_in_string(template['cypher'], combination)
                     answer = self.replace_token_in_string(template['answer'], combination)
                     valid_templates.append({'question': question, 'cypher': cypher, 'answer': answer})
         return valid_templates
+    
+    def compute_question_similarity(self, templates, text):
+        for i, template in enumerate(templates):
+            score = Levenshtein.ratio(template['question'], text)
+            if score > 0.1:
+                template['score'] = score
+            else:
+                del templates[i]
+        return sorted(templates, key=lambda x:x['score'], reverse=True)
+
 
     # 调用
     def query(self, text):
         slots = self.get_mention_slots(text)
         print(slots)
         templates = self.expand_templates(slots)
+        templates = self.compute_question_similarity(templates, text)
         print(templates)
 
 if __name__ == '__main__':
     graph_qa = GraphQA()
     answer = graph_qa.query('霸王别姬的片长？')
-    answer = graph_qa.query('霸王别姬是谁主演的？')
-    answer = graph_qa.query('张国荣和霸王别姬是什么关系？')
+    # answer = graph_qa.query('霸王别姬是谁主演的？')
+    # answer = graph_qa.query('张国荣和霸王别姬是什么关系？')

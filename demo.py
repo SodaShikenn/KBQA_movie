@@ -1,3 +1,26 @@
+lst = [
+    {'score': 0.55, 'question':'周星驰的导演是谁'},
+    {'score': 0.4, 'question':'周星驰主演过哪些电影'},
+    {'score': 0.8, 'question':'周星驰导演过哪些电影'},
+]
+
+res = sorted(lst, key=lambda x:x['score'], reverse=True)
+print(res)
+
+exit()
+
+import Levenshtein
+
+question = '周星驰导演过什么电影'
+
+t_question1 = '周星驰导演过哪些电影'
+t_question2 = '周星驰的导演是谁'
+
+print(Levenshtein.ratio(question, t_question1))
+print(Levenshtein.ratio(question, t_question2))
+
+exit()
+
 question = '%ENT%的%REL%是谁？'
 combination = {'%ENT%':'霸王别姬', '%REL%':'导演'}
 
