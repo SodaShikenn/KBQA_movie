@@ -8,6 +8,7 @@ NEO4J_URI='neo4j+s://ce7d909d.databases.neo4j.io'
 NEO4J_USERNAME='neo4j'
 NEO4J_PASSWORD='xJ9wCJYoBYyfZAldtl60l1RzQyVnXHm73qfmIRKjDMw'
 
+THRESHOLD = 0.1
 
 SYNONYMS_MAP = {
     'attributes': {

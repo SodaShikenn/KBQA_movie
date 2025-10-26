@@ -1,9 +1,10 @@
 from config import *
 import re, json, itertools, Levenshtein
+from py2neo import Graph
 
 class GraphQA():
     def __init__(self):
-        pass
+        self.graph = Graph(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
 
     def parse_mention_entities(self, text):
         with open(ENTITIES_PATH, encoding='utf-8') as file:
@@ -67,7 +68,7 @@ class GraphQA():
             if self.check_slots(cypher_slots, slots):
                 combinations = self.get_slots_combinations(cypher_slots, slots)
                 for combination in combinations:
-                    question = self.replace_token_in_string(template['question'], combinatio_n)
+                    question = self.replace_token_in_string(template['question'], combination)
                     cypher = self.replace_token_in_string(template['cypher'], combination)
                     answer = self.replace_token_in_string(template['answer'], combination)
                     valid_templates.append({'question': question, 'cypher': cypher, 'answer': answer})
@@ -76,23 +77,49 @@ class GraphQA():
     def compute_question_similarity(self, templates, text):
         for i, template in enumerate(templates):
             score = Levenshtein.ratio(template['question'], text)
-            if score > 0.1:
+            if score > THRESHOLD:
                 template['score'] = score
             else:
                 del templates[i]
         return sorted(templates, key=lambda x:x['score'], reverse=True)
 
+    def query_and_replace_answer(self, templates):
+        for template in templates:
+            try:
+                result = self.graph.run(template['cypher']).data()[0]
+                if result['RES']:
+                    return self.replace_token_in_string(template['answer'], {'RES': result['RES']})
+            except:
+                pass
 
     # 调用
     def query(self, text):
         slots = self.get_mention_slots(text)
-        print(slots)
         templates = self.expand_templates(slots)
         templates = self.compute_question_similarity(templates, text)
-        print(templates)
+        answer = self.query_and_replace_answer(templates)
+        return answer if answer else '抱歉，没有找到答案！'
+
 
 if __name__ == '__main__':
     graph_qa = GraphQA()
     answer = graph_qa.query('霸王别姬的片长？')
-    # answer = graph_qa.query('霸王别姬是谁主演的？')
-    # answer = graph_qa.query('张国荣和霸王别姬是什么关系？')
+    print(answer)
+    answer = graph_qa.query('霸王别姬是谁主演的？')
+    print(answer)
+    answer = graph_qa.query('张国荣和霸王别姬是什么关系？')
+    print(answer)
+    answer = graph_qa.query('贞子的导演是谁？')
+    print(answer)
+    answer = graph_qa.query('肖申克的救赎编剧有哪些？')
+    print(answer)
+"""
+   [{'question': '霸王别姬主演过哪些电影', 
+     'cypher': "MATCH (n)-[:主演]->(m {name:'霸王别姬'}) RETURN SUBSTRING(REDUCE(s = '', x IN COLLECT(n.name) | s + ' / ' + x), 3) AS RES", 
+     'answer': '霸王别姬主演过的电影：RES', 
+     'score': 0.5714285714285714}, 
+     {'question': '霸王别姬的主演是谁/有哪些', 
+      'cypher': "MATCH (n {name:'霸王别姬'})-[:主演]->(m) RETURN SUBSTRING(REDUCE(s = '', x IN COLLECT(m.name) | s + ' / ' + x), 3) AS RES", 
+      'answer': '霸王别姬的主演：RES', 
+      'score': 0.5217391304347826}] 
+"""
