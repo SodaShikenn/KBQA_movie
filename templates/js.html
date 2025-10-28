@@ -18,7 +18,6 @@
                 this.dialogs.push({type:type, content:content})
             },
             submit(){
-                console.log(111)
                 this.additem(2, this.question)
                 fetch('/test', {
                     method: 'POST',

@@ -5,86 +5,123 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>豆瓣TOP250知识图谱问答机器人</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/alpinejs/3.15.0/cdn.js" defer></script>
+    <script>
+        scollBottom = function() {
+            var chatBox = document.querySelector('.overflow-y-auto');
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+        window.onload = scollBottom
+        
+        function data(){
+            return {
+                question: '',
+                dialogs: [
+                    {type:1, content:'你好，有什么可以帮你？'},
+                ],
+                additem(type, content){
+                    this.dialogs.push({type:type, content:content})
+                    setTimeout(scollBottom, 300)
+                },
+                submit(){
+                    this.additem(2, this.question)
+                    fetch('/search', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({question: this.question}),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        this.additem(1, data.answer)
+                    }).catch(error=>{
+                        this.additem(1, '抱歉，系统异常，请稍后重试！')
+                    })
+                    this.question = ''
+                }
+            }
+        }
+    </script>
 </head>
 <body>
     <body class="bg-gray-50 h-screen flex justify-center items-center">
-    <div class="h-[80%] w-[80%] border rounded-xl overflow-hidden shadow flex">
-        
-        <div class="w-[300px] flex flex-col h-full px-5 py-8 bg-indigo-50 border-r">
-    <div class="flex-1">
-        <h1 class="font-bold text-2xl">电影知识问答</h1>
-        <p class="text-sm mt-2 text-gray-600">——基于豆瓣电影Top250数据</p>
-        <div class="border-2 rounded px-4 border-indigo-300 bg-white mt-6 divide-y">
-            <div class="py-4">
-                <h3 class="font-semibold">查属性</h3>
-                <ul class="leading-7 mt-1 text-sm text-gray-700">
-                    <li>介绍一下阿甘正传</li>
-                    <li>霸王别姬的片长是多少？</li>
-                    <li>阿甘正传的豆瓣评分是多少？</li>
-                </ul>
-            </div>
-            <div class="py-4">
-                <h3 class="font-semibold">查关系</h3>
-                <ul class="leading-7 mt-1 text-sm text-gray-700">
-                    <li>张国荣主演过哪些电影？</li>
-                    <li>周星驰导演过哪些电影？</li>
-                    <li>霸王别姬的导演是谁？</li>
-                    <li>大话西游的主演有哪些？</li>
-                    <li>张国荣和霸王别姬是什么关系？</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    <div class="text-gray-700 text-sm text-right">
-        Copyright @ <a href="https://github.com/SodaShikenn/KBQA_movie">SodaShikenn</a>
-    </div>
-</div>
-    <div class="bg-white flex-1 flex flex-col">
-    <div class="px-5 py-3 border-b font-semibold">我的聊天</div>
-    <div class="p-5 text-sm flex-1">
-        <div class="space-y-3">
-            <div>
-                <div class="flex space-x-1 items-start">
-                    <div class="border rounded-lg p-1">
-                        <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="17" width="30" height="26" rx="2" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M33 9L28 17" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 9L20 17" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="34" cy="7" r="2" stroke="#333" stroke-width="4"/><circle cx="14" cy="7" r="2" stroke="#333" stroke-width="4"/><rect x="16" y="24" width="16" height="8" rx="4" fill="none" stroke="#333" stroke-width="4"/><path d="M9 24H4V34H9" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M39 24H44V34H39" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </div>
-                    <div class="border border-gray-300 px-3 py-2 bg-gray-100 rounded">
-                        有什么可以帮你的吗?
+        <div class="h-[80%] w-[80%] border rounded-xl overflow-hidden shadow flex">
+            
+            <div class="w-[300px] flex flex-col h-full px-5 py-8 bg-indigo-50 border-r">
+                <div class="flex-1">
+                    <h1 class="font-bold text-2xl">电影知识问答</h1>
+                    <p class="text-sm mt-2 text-gray-600">——基于豆瓣电影Top250数据</p>
+                    <div class="border-2 rounded px-4 border-indigo-300 bg-white mt-6 divide-y">
+                        <div class="py-4">
+                            <h3 class="font-semibold">查属性</h3>
+                            <ul class="leading-7 mt-1 text-sm text-gray-700">
+                                <li>介绍一下阿甘正传</li>
+                                <li>霸王别姬的片长是多少？</li>
+                                <li>阿甘正传的豆瓣评分是多少？</li>
+                            </ul>
+                        </div>
+                        <div class="py-4">
+                            <h3 class="font-semibold">查关系</h3>
+                            <ul class="leading-7 mt-1 text-sm text-gray-700">
+                                <li>张国荣主演过哪些电影？</li>
+                                <li>周星驰导演过哪些电影？</li>
+                                <li>霸王别姬的导演是谁？</li>
+                                <li>大话西游的主演有哪些？</li>
+                                <li>张国荣和霸王别姬是什么关系？</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-                <div class="flex space-x-1 items-start justify-end">
-                    <div class="border border-blue-300 px-3 py-2 bg-blue-100 rounded">
-                        霸王别姬的片长是多少？
-                    </div>
-                    <div class="border rounded-lg p-1">
-                        <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M42 44C42 34.0589 33.9411 26 24 26C14.0589 26 6 34.0589 6 44" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </div>
+                <div class="text-gray-700 text-sm text-right">
+                    Copyright @ <a href="http://www.ichenhua.cn">陈华编程</a>
                 </div>
+            </div>
 
-                <div class="flex space-x-1 items-start">
-                    <div class="border rounded-lg p-1">
-                        <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="17" width="30" height="26" rx="2" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M33 9L28 17" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 9L20 17" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="34" cy="7" r="2" stroke="#333" stroke-width="4"/><circle cx="14" cy="7" r="2" stroke="#333" stroke-width="4"/><rect x="16" y="24" width="16" height="8" rx="4" fill="none" stroke="#333" stroke-width="4"/><path d="M9 24H4V34H9" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M39 24H44V34H39" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div class="bg-white flex-1 flex flex-col" x-data="data()">
+                <div class="px-5 py-3 border-b font-semibold">我的聊天</div>
+                <div class="p-5 text-sm flex-1 overflow-y-auto">
+                    <div class="space-y-3">
+                        <template x-for="item in dialogs">
+                            <div>
+                                <template x-if="item.type==1">
+                                    <div class="flex space-x-1 items-start">
+                                        <div class="border rounded-lg p-1">
+                                            <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="18" width="30" height="24" rx="2" fill="none" stroke="currentColor" stroke-width="4"/><circle cx="17" cy="26" r="2" fill="currentColor"/><circle cx="31" cy="26" r="2" fill="currentColor"/><path d="M20 32C18.8954 32 18 32.8954 18 34C18 35.1046 18.8954 36 20 36V32ZM28 36C29.1046 36 30 35.1046 30 34C30 32.8954 29.1046 32 28 32V36ZM20 36H28V32H20V36Z" fill="currentColor"/><path d="M24 10V18" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 26V34" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M44 26V34" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="24" cy="8" r="2" stroke="currentColor" stroke-width="4"/></svg>
+                                        </div>
+                                        <div class="border border-gray-300 px-3 py-2 bg-gray-100 rounded">
+                                            <span x-text="item.content"></span>
+                                        </div>
+                                    </div>
+                                </template>
+                                <template x-if="item.type==2">
+                                    <div class="flex space-x-1 items-start justify-end">
+                                        <div class="border border-blue-300 px-3 py-2 bg-blue-100 rounded">
+                                            <span x-text="item.content"></span>
+                                        </div>
+                                        <div class="border rounded-lg p-1">
+                                            <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M42 44C42 34.0589 33.9411 26 24 26C14.0589 26 6 34.0589 6 44" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
                     </div>
-                    <div class="border border-gray-300 px-3 py-2 bg-gray-100 rounded">
-                        霸王别姬的片长是：148分钟
+                </div>
+                
+                <div class="border-t px-5 py-4 text-sm">
+                    <div class="flex items-end p-2 space-x-4 border border-2 rounded-xl">
+                        <textarea class="flex-1 h-16 px-3 py-1 outline-none" name="" x-model="question"></textarea>
+                        <button x-on:click="submit()" class="flex items-center bg-cyan-600 text-white rounded-lg px-3 py-1.5 space-x-1">
+                            <svg class="w-5 h-5" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M43 5L29.7 43L22.1 25.9L5 18.3L43 5Z" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><path d="M43.0001 5L22.1001 25.9" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            <span>发送</span>
+                        </button>
                     </div>
                 </div>
             </div>
+
         </div>
-    </div>
-    
-    <div class="border-t px-5 py-4 text-sm">
-        <div class="flex items-end p-2 space-x-4 border border-2 rounded-xl">
-            <textarea class="flex-1 h-16 px-3 py-1 outline-none" name=""></textarea>
-            <button class="flex items-center bg-cyan-600 text-white rounded-lg px-3 py-1.5 space-x-1">
-                <svg class="w-5 h-5" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M43 5L29.7 43L22.1 25.9L5 18.3L43 5Z" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><path d="M43.0001 5L22.1001 25.9" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <span>发送</span>
-            </button>
-        </div>
-    </div>
-</div>
-    </div>
+    </body>
 </body>
-</body>
-<html>
+</html>
 
