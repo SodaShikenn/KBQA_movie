@@ -98,28 +98,21 @@ class GraphQA():
         templates = self.expand_templates(slots)
         templates = self.compute_question_similarity(templates, text)
         answer = self.query_and_replace_answer(templates)
+        print(templates)
         return answer if answer else '抱歉，没有找到答案！'
 
 
 if __name__ == '__main__':
     graph_qa = GraphQA()
-    answer = graph_qa.query('霸王别姬的片长？')
+    answer = graph_qa.query('介绍一下霸王别姬？')
     print(answer)
-    answer = graph_qa.query('霸王别姬是谁主演的？')
-    print(answer)
-    answer = graph_qa.query('张国荣和霸王别姬是什么关系？')
-    print(answer)
-    answer = graph_qa.query('贞子的导演是谁？')
-    print(answer)
-    answer = graph_qa.query('肖申克的救赎编剧有哪些？')
-    print(answer)
-"""
-   [{'question': '霸王别姬主演过哪些电影', 
-     'cypher': "MATCH (n)-[:主演]->(m {name:'霸王别姬'}) RETURN SUBSTRING(REDUCE(s = '', x IN COLLECT(n.name) | s + ' / ' + x), 3) AS RES", 
-     'answer': '霸王别姬主演过的电影：RES', 
-     'score': 0.5714285714285714}, 
-     {'question': '霸王别姬的主演是谁/有哪些', 
-      'cypher': "MATCH (n {name:'霸王别姬'})-[:主演]->(m) RETURN SUBSTRING(REDUCE(s = '', x IN COLLECT(m.name) | s + ' / ' + x), 3) AS RES", 
-      'answer': '霸王别姬的主演：RES', 
-      'score': 0.5217391304347826}] 
-"""
+    # answer = graph_qa.query('霸王别姬的片长？')
+    # print(answer)
+    # answer = graph_qa.query('霸王别姬是谁主演的？')
+    # print(answer)
+    # answer = graph_qa.query('张国荣和霸王别姬是什么关系？')
+    # print(answer)
+    # answer = graph_qa.query('贞子的导演是谁？')
+    # print(answer)
+    # answer = graph_qa.query('肖申克的救赎编剧有哪些？')
+    # print(answer)
