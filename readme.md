@@ -1,9 +1,10 @@
 # 映画知識グラフQAシステム
 
-> 豆瓣映画TOP250を対象とした知識グラフベースの質問応答システム。Webスクレイピング、Neo4jグラフデータベース、インテリジェントなクエリマッチングを実装。
+> 豆瓣映画TOP250を対象とした知識グラフベースの質問応答システム。Webスクレイピング、Neo4jグラフデータベース、インテリジェントなクエリマッチング、Webインターフェースを実装。
 
 [![Python](https://img.shields.io/badge/Python-3.7+-blue.svg)](https://www.python.org/downloads/)
 [![Neo4j](https://img.shields.io/badge/Neo4j-5.0+-green.svg)](https://neo4j.com/)
+[![Flask](https://img.shields.io/badge/Flask-3.0+-red.svg)](https://flask.palletsprojects.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## 機能
@@ -12,37 +13,55 @@
 - **知識グラフ**: Neo4jベースのグラフデータベース（映画、監督、脚本家、俳優）
 - **スマートQAシステム**: テンプレートマッチング + Levenshtein距離による柔軟な質問応答
 - **中国語対応**: 同義語マッピングと自然言語処理による中国語クエリのサポート
+- **Webインターフェース**: Flaskベースのインタラクティブなチャットシステム
 
 ## クイックスタート
+
+### 1. インストールと設定
 
 ```bash
 # 依存パッケージのインストール
 pip install -r requirements.txt
 
+# Neo4j接続情報の設定（config.py）
+# NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD を設定
+
 # 知識グラフの構築（Neo4j接続が必要）
 python build_graph.py
+```
 
-# QAシステムのテスト
+### 2. QAシステムの起動
+
+**コマンドラインテスト:**
+
+```bash
 python question_match.py
 ```
 
-**クエリ例:**
+**Webインターフェース:**
+
+```bash
+python app.py
+# ブラウザで http://localhost:5000 にアクセス
+```
+
+### 3. クエリ例
 
 ```python
 graph_qa = GraphQA()
-print(graph_qa.query('霸王别姬的片长？'))           # "171分钟"
-print(graph_qa.query('张国荣主演过哪些电影？'))      # 映画リストを返す
-print(graph_qa.query('肖申克的救赎的评分是多少？'))  # "9.7"
+print(graph_qa.query('霸王别姬的片长？'))           # "霸王别姬的片长是：171分钟"
+print(graph_qa.query('张国荣主演过哪些电影？'))      # "张国荣主演过的电影：霸王别姬 / ..."
+print(graph_qa.query('肖申克的救赎的评分是多少？'))  # "肖申克的救赎的评分是：9.7"
 ```
 
 ## アーキテクチャ
 
 ```text
-┌─────────────────┐      ┌──────────────────┐      ┌─────────────────┐
-│  Webスクレイピング│─────▶│  知識グラフ      │─────▶│   QAシステム     │
-│  (240本の映画)   │      │  (Neo4j DB)      │      │ (テンプレート +  │
-│                 │      │                  │      │  類似度計算)     │
-└─────────────────┘      └──────────────────┘      └─────────────────┘
+┌─────────────────┐      ┌──────────────────┐      ┌─────────────────┐      ┌─────────────────┐
+│  Webスクレイピング│─────▶│  知識グラフ      │─────▶│   QAシステム     │◄─────│ Webインターフェース│
+│  (240本の映画)   │      │  (Neo4j DB)      │      │ (テンプレート +  │      │  (Flask + UI)   │
+│                 │      │                  │      │  類似度計算)     │      │                 │
+└─────────────────┘      └──────────────────┘      └─────────────────┘      └─────────────────┘
 ```
 
 ### データモデル
@@ -141,28 +160,62 @@ Levenshtein距離による類似度マッチングを備えたテンプレート
 ```text
 $ python question_match.py
 
-171分钟
-张国荣 / 张丰毅 / 巩俐 / 葛优
-霸王别姬是张国荣的：主演
-抱歉，没有找到答案！
-弗兰克·德拉邦特 / 斯蒂芬·金
+霸王别姬的介绍是：影片借一出《霸王别姬》的京戏，牵扯出三个人之间一段随时代风云变幻的爱恨情仇...
+```
+
+### 4. Webインターフェース ✅
+
+**ファイル:** [app.py](app.py), [templates/chat.html](templates/chat.html)
+
+FlaskベースのRESTful APIとインタラクティブなチャットUI。
+
+- **フレームワーク**: Flask
+- **エンドポイント**:
+  - `GET /`: チャットインターフェース
+  - `POST /search`: 質問応答API
+- **フロントエンド**: HTML + JavaScript + CSS
+
+**主要機能:**
+
+- リアルタイムチャットUI
+- JSON形式のレスポンス
+- GraphQAシステムとの統合
+- レスポンシブデザイン
+
+**使用方法:**
+
+```bash
+python app.py
+# ブラウザで http://localhost:5000 にアクセス
+```
+
+**APIエンドポイント:**
+
+```bash
+curl -X POST http://localhost:5000/search \
+  -H "Content-Type: application/json" \
+  -d '{"question": "霸王别姬的导演是谁？"}'
 ```
 
 ## プロジェクト構成
 
 ```text
-KBQA_movie/
-├── config.py                      # 設定ファイルとテンプレート
-├── build_graph.py                 # 知識グラフ構築
-├── question_match.py              # QAシステム
-├── demo.py                        # 開発用テストスニペット
-├── requirements.txt               # 依存パッケージ
-├── readme.md                      # 英語版README
-├── readme_ja.md                   # このファイル（日本語版）
-└── data/
-    ├── douban_crawler.py          # Webスクレイパー
-    ├── douban_top250_movies.json  # 映画データ（240件）
-    └── entities.txt               # マッチング用エンティティリスト
+kbqa_movie/
+├── code/
+│   ├── config.py                      # 設定ファイルとテンプレート
+│   ├── build_graph.py                 # 知識グラフ構築
+│   ├── question_match.py              # QAシステム
+│   ├── app.py                         # Flask Webアプリケーション
+│   ├── demo.py                        # 開発用テストスニペット
+│   ├── requirements.txt               # 依存パッケージ
+│   ├── readme.md                      # このファイル（日本語版README）
+│   ├── data/
+│   │   ├── douban_crawler.py          # Webスクレイパー
+│   │   ├── douban_top250_movies.json  # 映画データ（240件）
+│   │   └── entities.txt               # マッチング用エンティティリスト
+│   └── templates/
+│       └── chat.html                  # チャットUIテンプレート
+└── Part3_KBQA-movie/                  # 元のコース資料
 ```
 
 ## 設定
@@ -194,16 +247,20 @@ pip install -r requirements.txt
 
 ## 最新の改善内容（2025年10月）
 
-### QAシステムの強化
+### 完成した機能
 
 - ✅ **Levenshtein距離マッチング**: クエリのバリエーションや誤字に対応
 - ✅ **Neo4j統合**: py2neoによる直接的なデータベースクエリ
 - ✅ **エラーハンドリング**: 未知のクエリに対するグレースフルなフォールバック
 - ✅ **コードドキュメント**: [build_graph.py](build_graph.py)の包括的なdocstring
+- ✅ **Webインターフェース**: FlaskベースのインタラクティブなチャットUI
+- ✅ **REST API**: JSON形式の質問応答エンドポイント
 
 ### テストと開発
 
 - [demo.py](demo.py): Levenshtein距離、スロット組み合わせ、正規表現マッチング、defaultdict操作の単体テスト
+- [question_match.py](question_match.py): コマンドラインテストインターフェース
+- [app.py](app.py): Flask Webアプリケーション
 
 ## 今後の改善予定
 
@@ -213,19 +270,27 @@ pip install -r requirements.txt
 - **高度なテンプレート**: 複数条件クエリ、ランキング/比較クエリ（例: "評価が最も高い映画は？"）
 - **ファジー検索の強化**: より良いスペル修正、音声マッチング
 - **Neo4j最適化**: インデックス作成、クエリパフォーマンスチューニング
-
-### フロントエンド（未実装）
-
-- FlaskバックエンドAPI
-- TailwindCSS + Alpine.js UI
-- リアルタイムチャットインターフェース
+- **UI強化**: レスポンシブデザイン、多言語対応、検索履歴
 
 ## 備考
 
-- **データ更新日**: 2025年10月19日
-- **成功率**: 240/250本（一部の新しい映画は異なるHTML構造を持つ）
-- **言語**: 豊富な同義語マッピングによる中国語サポート
-- **データベース**: Neo4j Cloud（Neo4j+S）
+- **プロジェクト完成日**: 2025年10月28日
+- **データ収集日**: 2025年10月19日
+- **データ成功率**: 240/250本（一部の新しい映画は異なるHTML構造を持つ）
+- **言語サポート**: 豊富な同義語マッピングによる中国語サポート
+- **データベース**: Neo4j Cloud（Neo4j+S プロトコル）
+- **開発環境**: Python 3.7+, Flask 3.0+
+
+## 実装状況
+
+| コンポーネント | 状態 | ファイル |
+|-------------|------|---------|
+| データ収集 | ✅ 完了 | [data/douban_crawler.py](data/douban_crawler.py) |
+| 知識グラフ構築 | ✅ 完了 | [build_graph.py](build_graph.py) |
+| QAシステム | ✅ 完了 | [question_match.py](question_match.py) |
+| REST API | ✅ 完了 | [app.py](app.py) |
+| Webインターフェース | ✅ 完了 | [templates/chat.html](templates/chat.html) |
+| 設定管理 | ✅ 完了 | [config.py](config.py) |
 
 ## ライセンス
 
@@ -233,4 +298,4 @@ pip install -r requirements.txt
 
 ---
 
-**使用技術:** Python 3.7+ | Neo4j 5.0+ | BeautifulSoup4 | py2neo | Levenshtein
+**使用技術:** Python 3.7+ | Flask 3.0+ | Neo4j 5.0+ | BeautifulSoup4 | py2neo | Levenshtein
