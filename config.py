@@ -4,9 +4,9 @@ BASE_PATH = os.path.dirname(__file__)
 RAW_DATA_PATH =os.path.join(BASE_PATH, './data/douban_top250_movies.json')
 ENTITIES_PATH =os.path.join(BASE_PATH, './data/entities.txt')
 
-NEO4J_URI='neo4j+s://ce7d909d.databases.neo4j.io'
-NEO4J_USERNAME='neo4j'
-NEO4J_PASSWORD='xJ9wCJYoBYyfZAldtl60l1RzQyVnXHm73qfmIRKjDMw'
+NEO4J_URI='YOURS'
+NEO4J_USERNAME='YOURS'
+NEO4J_PASSWORD='YOURS'
 
 THRESHOLD = 0.1
 
